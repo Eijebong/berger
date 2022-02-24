@@ -1,0 +1,32 @@
+{% import "menu.html.tera" as menu %}
+<!DOCTYPE html >
+<html lang="en">
+    <head>
+        <title>{% block title %}Berger{% endblock title %}</title>
+        <meta charset="UTF-8" />
+        <link rel="stylesheet" href="/static/css/base.css" />
+        <link rel="stylesheet" href="/static/contrib/font-awesome/css/all.min.css" />
+
+        {% block styles %}
+        {% endblock styles %}
+    </head>
+    <body>
+        <nav id="navigation">
+            {{ menu::app_menu_item(name="Task list", icon="fa-brands fa-buffer", url="/", module="index", cur_module=cur_module) }}
+            <li class="separator"></li>
+        </nav>
+
+        <div id="main-container">
+            <main id="main" >
+                <nav id="module-menu">
+                    {% block menu %}{% endblock menu %}
+                </nav>
+                {% block main %}{% endblock main %}
+            </main>
+        </div>
+        {% block scripts %}
+        {% endblock scripts %}
+    </body>
+</html>
+
+

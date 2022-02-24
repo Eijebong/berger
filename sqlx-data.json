@@ -1,0 +1,197 @@
+{
+  "db": "PostgreSQL",
+  "495d9d57e4bccfb10e02f6a7dcde210eab7f8fd30fb279ac050c34370f76b558": {
+    "query": "SELECT task_groups.id,\n                    task_groups.created_at,\n                    task_groups.git_ref,\n                    task_groups.repo_org,\n                    task_groups.repo_name,\n                    task_groups.source,\n                    array_agg(row(tasks.id, tasks.status, tasks.name)::task) as tasks\n             FROM task_groups INNER JOIN tasks on task_groups.id=tasks.task_group GROUP BY task_groups.id HAVING 'failed' = ANY(array_agg(tasks.status)) or 'exception' = ANY(array_agg(tasks.status)) ORDER BY task_groups.created_at DESC LIMIT 500",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 1,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 2,
+          "name": "git_ref",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 3,
+          "name": "repo_org",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 4,
+          "name": "repo_name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 5,
+          "name": "source",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "tasks",
+          "type_info": {
+            "Custom": {
+              "name": "_task",
+              "kind": {
+                "Array": {
+                  "Custom": {
+                    "name": "task",
+                    "kind": {
+                      "Composite": [
+                        [
+                          "id",
+                          "Varchar"
+                        ],
+                        [
+                          "status",
+                          "Varchar"
+                        ],
+                        [
+                          "name",
+                          "Varchar"
+                        ]
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        null
+      ]
+    }
+  },
+  "9667fa1879c181768e958e449eb70a67560cc903070387b6a8d12016c02d3d74": {
+    "query": "INSERT INTO tasks(id, status, task_group, name) VALUES($1, $2, $3, $4) ON CONFLICT(id) DO UPDATE SET status=$2",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Varchar"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "b29478def33299b28c47b0933a8f79031931f9fa9b865a70a45a386993349df7": {
+    "query": "SELECT task_groups.id,\n                    task_groups.created_at,\n                    task_groups.git_ref,\n                    task_groups.repo_org,\n                    task_groups.repo_name,\n                    task_groups.source,\n                    array_agg(row(tasks.id, tasks.status, tasks.name)::task) as tasks\n             FROM task_groups INNER JOIN tasks on task_groups.id=tasks.task_group GROUP BY task_groups.id ORDER BY task_groups.created_at DESC LIMIT 500",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 1,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 2,
+          "name": "git_ref",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 3,
+          "name": "repo_org",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 4,
+          "name": "repo_name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 5,
+          "name": "source",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "tasks",
+          "type_info": {
+            "Custom": {
+              "name": "_task",
+              "kind": {
+                "Array": {
+                  "Custom": {
+                    "name": "task",
+                    "kind": {
+                      "Composite": [
+                        [
+                          "id",
+                          "Varchar"
+                        ],
+                        [
+                          "status",
+                          "Varchar"
+                        ],
+                        [
+                          "name",
+                          "Varchar"
+                        ]
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        null
+      ]
+    }
+  },
+  "e822e628840d157533e5a2aa9e345123d1221acb416b0558b1554c0720986558": {
+    "query": "INSERT INTO task_groups(id, created_at, repo_org, repo_name, git_ref, source) VALUES($1, $2, $3, $4, $5, $6) ON CONFLICT DO NOTHING",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Timestamptz",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  }
+}
