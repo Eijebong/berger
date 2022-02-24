@@ -21,6 +21,8 @@ RUN groupadd $APP_USER \
     && mkdir -p ${APP}
 
 COPY --from=builder /build/target/release/berger ${APP}/berger
+COPY --from=builder /build/templates ${APP}/templates
+COPY --from=builder /build/static ${APP}/static
 
 RUN chown -R $APP_USER:$APP_USER ${APP}
 
