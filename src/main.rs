@@ -83,7 +83,7 @@ async fn root(req: &poem::Request) -> Result<Html<String>> {
                     let end = parts.next().unwrap();
                     (start, end)
                 } else {
-                    ("", "")
+                    (commit_range, "")
                 }
             } else {
                 ("", "")

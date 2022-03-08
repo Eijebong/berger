@@ -14,7 +14,9 @@
                     <time datetime="{{ group.group.created_at }}">{{group.group.created_at}}</time>
                 </div>
                 {% if group.start != "" %}
-                <span class="commit-range"><a href="{{group.group.source}}">{{ group.start }}...{{ group.end }}</a></span>
+                <span class="commit-range">
+                    <a href="{{group.group.source}}">{{ group.start }}{% if group.end != "" %}...{{ group.end }}{% endif %}</a>
+                </span>
                 {% endif %}
             </header>
             {% for task in group.group.tasks %}
