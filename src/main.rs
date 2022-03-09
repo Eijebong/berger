@@ -74,7 +74,7 @@ async fn login() -> Result<Redirect> {
     .set_redirect_uri(RedirectUrl::new(
         std::env::var("REDIRECT_URL").unwrap_or_else(|_| {
             let url = Url::parse(&**BASE_URL).unwrap();
-            format!("https://berger.{}", url.host().unwrap())
+            format!("https://berger.{}/auth/callback", url.host().unwrap())
         }),
     )?);
 
