@@ -103,7 +103,13 @@ async fn callback(
             ("code", code),
             ("grant_type", "authorization_code".into()),
             ("client_id", "berger".into()),
-            ("redirect_uri", "http://127.0.0.1:3000/auth/callback".into()),
+            (
+                "redirect_uri",
+                std::env::var("REDIRECT_URL").unwrap_or_else(|_| {
+                    let url = Url::parse(&**BASE_URL).unwrap();
+                    format!("https://berger.{}/auth/callback", url.host().unwrap())
+                }),
+            ),
         ])
         .build()?;
     let res = client.execute(req).await?;
