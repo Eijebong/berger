@@ -15,6 +15,20 @@ environment variables:
 - `TASKCLUSTER_ROOT_URL`: The root URL of your taskcluster instance, example: `https://taskcluster.your.org`
 - `AMQP_ADDR`: The address of the rabbitmq used for taskcluster's pulse, example: `amqp://user:password@rabbitmq.taskcluster.your.org`
 - `DATABASE_URL`: The URL of the postgresql database berger will use to store its data, example: `postgres://user@password@postgres.taskcluster.your.org/berger`
+- `REDIRECT_URL`(optional): If your instance is not deployed as `berger.${TASKCLUSTER_ROOT_URL}`, set this to `berger.url/auth/callback`
+
+To use the login feature, you have to add an oauth client definition to your taskcluster instance.
+
+Example:
+
+`registered_clients: [ {"clientId": "berger", "responseType": "code", "scope": ["berger:*"], "whitelisted": true, "redirectUri": ["https://berger.taskcluster.url/auth/callback"], "maxExpires": "1 year" } ]`
+
+# Scopes
+
+To avoid leaking repositories, berger uses scopes to filter what's displayed.
+You should add a `berger:get-repo:org/name` scope to roles that should have
+access to those repositories. You can also replace `org/name` by a `*` to allow
+all repositories.
 
 # Usage
 

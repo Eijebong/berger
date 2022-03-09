@@ -14,6 +14,11 @@
         <nav id="navigation">
             {{ menu::app_menu_item(name="Task list", icon="fa-brands fa-buffer", url="/", module="index", cur_module=cur_module) }}
             <li class="separator"></li>
+            {% if logged_in %}
+            {{ menu::app_menu_item(name="Logout", icon="fa fa-sign-out", url="/auth/logout", module="logout", cur_module=cur_module) }}
+            {% else %}
+            {{ menu::app_menu_item(name="Login", icon="fa fa-sign-in", url="/auth/login", module="login", cur_module=cur_module) }}
+            {% endif %}
         </nav>
 
         <div id="main-container">
