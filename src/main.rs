@@ -44,26 +44,36 @@ pub fn get_context_for(module_name: &str, session: &Session) -> Context {
     context
 }
 
-async fn run_pulse() {
-    loop {
-        let _ = pulse::start_pulse_handler().await;
-        tokio::time::sleep(std::time::Duration::from_secs(1)).await;
-    }
+fn setup_pulse() {
+    tokio::spawn(async {
+        loop {
+            let _ = pulse::start_pulse_handler().await;
+            tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+        }
+    });
 }
 
-#[tokio::main]
-async fn main() -> Result<()> {
+fn setup_logging() {
     if std::env::var("RUST_LOG").is_err() {
         std::env::set_var("RUST_LOG", "info");
     }
-
     tracing_subscriber::fmt::init();
+}
 
+async fn setup_db() -> Result<()> {
     db::init_pool(&std::env::var("DATABASE_URL").unwrap()).await?;
     sqlx::migrate!("./migrations")
         .run(db::POOL.get().unwrap())
         .await?;
-    tokio::spawn(run_pulse());
+
+    Ok(())
+}
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    setup_logging();
+    setup_db().await?;
+    setup_pulse();
 
     let app = Route::new()
         .at("/", get(crate::views::task_list::root))
