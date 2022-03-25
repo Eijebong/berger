@@ -1,6 +1,7 @@
 use crate::models::TaskGroup;
 use anyhow::Result;
 
+use poem::web::Redirect;
 use poem::{handler, session::Session, web::Html};
 
 use std::collections::HashSet;
@@ -8,6 +9,7 @@ use std::collections::HashSet;
 use serde::Serialize;
 use taskcluster::Credentials;
 
+use crate::views::utils::HtmlOrRedirect;
 use crate::{db, get_context_for, BASE_URL, TEMPLATES};
 
 #[derive(Serialize)]
@@ -19,7 +21,7 @@ struct ComputedTaskGroup<'a> {
 }
 
 #[handler]
-pub async fn root(req: &poem::Request, session: &Session) -> Result<Html<String>> {
+pub async fn root(req: &poem::Request, session: &Session) -> Result<HtmlOrRedirect<String>> {
     let mut client = taskcluster::ClientBuilder::new(&**BASE_URL);
     if let Some(creds) = session.get::<Credentials>("credentials") {
         client = client.credentials(creds);
@@ -28,7 +30,7 @@ pub async fn root(req: &poem::Request, session: &Session) -> Result<Html<String>
     let mut scopes = tc_auth.currentScopes().await;
     if scopes.is_err() {
         session.remove("credentials");
-        scopes = Ok(tc_auth.currentScopes().await?);
+        return Ok(Redirect::see_other("/").into());
     }
 
     assert!(scopes.is_ok());
@@ -131,5 +133,5 @@ pub async fn root(req: &poem::Request, session: &Session) -> Result<Html<String>
     context.insert("groups", &groups);
     context.insert("failed", &only_failed);
 
-    Ok(Html(TEMPLATES.render("index.html", &context)?))
+    Ok(Html(TEMPLATES.render("index.html", &context)?).into())
 }
