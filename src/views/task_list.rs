@@ -75,53 +75,55 @@ pub async fn root(req: &poem::Request, session: &Session) -> Result<HtmlOrRedire
             let repo_name = format!("{}/{}", group.repo_org, group.repo_name);
             allowed_repos.contains(repo_name.as_str())
         })
-        .map(|group| {
-            let mut status = "completed";
-            let mut has_pending = false;
-            let (start, end) = if group.source.starts_with("https://github.com/") {
-                let commit_range = group.source.split('/').last().unwrap();
-                if commit_range.contains("...") {
-                    let mut parts = commit_range.split("...");
-                    let start = parts.next().unwrap();
-                    let end = parts.next().unwrap();
-                    (start, end)
-                } else {
-                    (commit_range, "")
-                }
-            } else {
-                ("", "")
-            };
-
-            for task in &group.tasks {
-                if task.status == "failed" || task.status == "exception" {
-                    status = "failed";
-                    break;
-                }
-
-                if task.status == "pending" {
-                    has_pending = true;
-                }
-
-                if task.status == "running" {
-                    status = "running";
-                }
-            }
-
-            if status == "completed" && has_pending {
-                status = "pending";
-            }
-
-            ComputedTaskGroup {
-                group,
-                status,
-                start,
-                end,
-            }
-        })
+        .map(compute_taskgroup_status)
         .collect::<Vec<_>>();
 
     context.insert("groups", &groups);
     context.insert("failed", &only_failed);
 
     Ok(Html(TEMPLATES.render("index.html", &context)?).into())
+}
+
+fn compute_taskgroup_status(group: &TaskGroup) -> ComputedTaskGroup {
+    let mut status = "completed";
+    let mut has_pending = false;
+    let (start, end) = if group.source.starts_with("https://github.com/") {
+        let commit_range = group.source.split('/').last().unwrap();
+        if commit_range.contains("...") {
+            let mut parts = commit_range.split("...");
+            let start = parts.next().unwrap();
+            let end = parts.next().unwrap();
+            (start, end)
+        } else {
+            (commit_range, "")
+        }
+    } else {
+        ("", "")
+    };
+
+    for task in &group.tasks {
+        if task.status == "failed" || task.status == "exception" {
+            status = "failed";
+            break;
+        }
+
+        if task.status == "pending" {
+            has_pending = true;
+        }
+
+        if task.status == "running" {
+            status = "running";
+        }
+    }
+
+    if status == "completed" && has_pending {
+        status = "pending";
+    }
+
+    ComputedTaskGroup {
+        group,
+        status,
+        start,
+        end,
+    }
 }
