@@ -1,16 +1,18 @@
 use crate::models::TaskGroup;
 use anyhow::Result;
 
-use poem::web::Redirect;
-use poem::{handler, session::Session, web::Html};
+use poem::{
+    handler,
+    session::Session,
+    web::{Html, Redirect},
+};
 
 use std::collections::HashSet;
 
 use serde::Serialize;
-use taskcluster::Credentials;
 
-use crate::views::utils::HtmlOrRedirect;
-use crate::{db, get_context_for, BASE_URL, TEMPLATES};
+use crate::views::utils::{gather_tc_scopes, HtmlOrRedirect};
+use crate::{db, get_context_for, TEMPLATES};
 
 #[derive(Serialize)]
 struct ComputedTaskGroup<'a> {
@@ -22,12 +24,8 @@ struct ComputedTaskGroup<'a> {
 
 #[handler]
 pub async fn root(req: &poem::Request, session: &Session) -> Result<HtmlOrRedirect<String>> {
-    let mut client = taskcluster::ClientBuilder::new(&**BASE_URL);
-    if let Some(creds) = session.get::<Credentials>("credentials") {
-        client = client.credentials(creds);
-    }
-    let tc_auth = taskcluster::Auth::new(client)?;
-    let mut scopes = tc_auth.currentScopes().await;
+    let scopes = gather_tc_scopes(session).await;
+
     if scopes.is_err() {
         session.remove("credentials");
         return Ok(Redirect::see_other("/").into());
@@ -36,18 +34,10 @@ pub async fn root(req: &poem::Request, session: &Session) -> Result<HtmlOrRedire
     assert!(scopes.is_ok());
     let scopes = scopes.unwrap();
 
-    let allowed_repos = scopes["scopes"]
-        .as_array()
-        .map(|scopes| {
-            scopes
-                .iter()
-                .filter_map(|scope| {
-                    let name = scope.as_str()?;
-                    name.strip_prefix("berger:get-repo:")
-                })
-                .collect::<HashSet<_>>()
-        })
-        .unwrap_or_else(HashSet::new);
+    let allowed_repos = scopes
+        .iter()
+        .filter_map(|scope| scope.strip_prefix("berger:get-repo:"))
+        .collect::<HashSet<_>>();
 
     let mut context = get_context_for("index", session);
     let mut conn = db::POOL.get().unwrap().acquire().await.unwrap();
