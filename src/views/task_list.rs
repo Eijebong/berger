@@ -84,11 +84,9 @@ pub async fn root(req: &poem::Request, session: &Session) -> Result<HtmlOrRedire
     Ok(Html(TEMPLATES.render("index.html", &context)?).into())
 }
 
-fn compute_taskgroup_status(group: &TaskGroup) -> ComputedTaskGroup {
-    let mut status = "completed";
-    let mut has_pending = false;
-    let (start, end) = if group.source.starts_with("https://github.com/") {
-        let commit_range = group.source.split('/').last().unwrap();
+fn get_commit_bounds_from_source(source: &str) -> (&str, &str) {
+    if source.starts_with("https://github.com/") {
+        let commit_range = source.split('/').last().unwrap();
         if commit_range.contains("...") {
             let mut parts = commit_range.split("...");
             let start = parts.next().unwrap();
@@ -99,7 +97,13 @@ fn compute_taskgroup_status(group: &TaskGroup) -> ComputedTaskGroup {
         }
     } else {
         ("", "")
-    };
+    }
+}
+
+fn compute_taskgroup_status(group: &TaskGroup) -> ComputedTaskGroup {
+    let mut status = "completed";
+    let mut has_pending = false;
+    let (start, end) = get_commit_bounds_from_source(&group.source);
 
     for task in &group.tasks {
         if task.status == "failed" || task.status == "exception" {
