@@ -346,6 +346,7 @@ dependencies = [
  "sqlx",
  "taskcluster",
  "tera",
+ "thiserror",
  "tokio",
  "tracing",
  "tracing-subscriber",

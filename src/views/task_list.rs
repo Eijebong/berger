@@ -1,11 +1,7 @@
 use crate::models::TaskGroup;
 use anyhow::Result;
 
-use poem::{
-    handler,
-    session::Session,
-    web::{Html, Redirect},
-};
+use poem::{handler, session::Session, web::Html};
 
 use std::collections::HashSet;
 
@@ -24,15 +20,7 @@ struct ComputedTaskGroup<'a> {
 
 #[handler]
 pub async fn root(req: &poem::Request, session: &Session) -> Result<HtmlOrRedirect<String>> {
-    let scopes = gather_tc_scopes(session).await;
-
-    if scopes.is_err() {
-        session.remove("credentials");
-        return Ok(Redirect::see_other("/").into());
-    }
-
-    assert!(scopes.is_ok());
-    let scopes = scopes.unwrap();
+    let scopes = gather_tc_scopes(session).await?;
 
     let allowed_repos = scopes
         .iter()

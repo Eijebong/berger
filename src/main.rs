@@ -1,4 +1,5 @@
 mod db;
+mod error;
 mod models;
 mod pulse;
 mod views;
@@ -10,7 +11,7 @@ use poem::{
     get,
     listener::TcpListener,
     session::{CookieConfig, CookieSession, Session},
-    web::cookie::CookieKey,
+    web::{cookie::CookieKey, Redirect},
     EndpointExt, Route, Server,
 };
 
@@ -89,6 +90,11 @@ async fn main() -> Result<()> {
         )))
         .inspect_all_err(|err| {
             tracing::error!("{:?}", err);
+        })
+        .catch_error(|err: crate::error::BergerError| async move {
+            match err {
+                crate::error::BergerError::AuthenticationError => return Redirect::see_other("/"),
+            }
         });
 
     Server::new(TcpListener::bind("0.0.0.0:3000"))

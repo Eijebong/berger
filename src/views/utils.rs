@@ -35,11 +35,18 @@ impl<T: Send + Into<String>> From<Redirect> for HtmlOrRedirect<T> {
 
 pub async fn gather_tc_scopes(session: &Session) -> Result<Vec<String>> {
     let mut client = taskcluster::ClientBuilder::new(&**BASE_URL);
+    let mut has_credentials = false;
     if let Some(creds) = session.get::<Credentials>("credentials") {
         client = client.credentials(creds);
+        has_credentials = true;
     }
     let tc_auth = taskcluster::Auth::new(client)?;
-    let scopes = tc_auth.currentScopes().await?;
+    let scopes = tc_auth.currentScopes().await.map_err(|e| {
+        if has_credentials {
+            return crate::error::BergerError::authentication_error(session).into();
+        }
+        e
+    })?;
 
     Ok(scopes["scopes"]
         .as_array()
