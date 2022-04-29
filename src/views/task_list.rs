@@ -8,7 +8,8 @@ use std::collections::HashSet;
 use serde::Serialize;
 
 use crate::views::utils::{gather_tc_scopes, HtmlOrRedirect};
-use crate::{db, get_context_for, TEMPLATES};
+use crate::{db, get_context_for, BaseContext};
+use askama::Template;
 
 #[derive(Serialize)]
 struct ComputedTaskGroup<'a> {
@@ -16,6 +17,14 @@ struct ComputedTaskGroup<'a> {
     status: &'a str,
     start: &'a str,
     end: &'a str,
+}
+
+#[derive(Template)]
+#[template(path = "index.html")]
+struct TaskListContext<'a> {
+    base: BaseContext<'a>,
+    groups: Vec<ComputedTaskGroup<'a>>,
+    failed: bool,
 }
 
 #[handler]
@@ -27,7 +36,6 @@ pub async fn root(req: &poem::Request, session: &Session) -> Result<HtmlOrRedire
         .filter_map(|scope| scope.strip_prefix("berger:get-repo:"))
         .collect::<HashSet<_>>();
 
-    let mut context = get_context_for("index", session);
     let mut conn = db::POOL.get().unwrap().acquire().await.unwrap();
     let only_failed = req.uri().query() == Some("failed");
 
@@ -66,10 +74,13 @@ pub async fn root(req: &poem::Request, session: &Session) -> Result<HtmlOrRedire
         .map(compute_taskgroup_status)
         .collect::<Vec<_>>();
 
-    context.insert("groups", &groups);
-    context.insert("failed", &only_failed);
+    let tpl = TaskListContext {
+        base: get_context_for("index", session),
+        groups,
+        failed: only_failed,
+    };
 
-    Ok(Html(TEMPLATES.render("index.html", &context)?).into())
+    Ok(Html(tpl.render().unwrap()).into())
 }
 
 fn get_commit_bounds_from_source(source: &str) -> (&str, &str) {

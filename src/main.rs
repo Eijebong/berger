@@ -16,33 +16,23 @@ use poem::{
 };
 
 use taskcluster::Credentials;
-use tera::{Context, Tera};
 
 lazy_static::lazy_static! {
     pub static ref BASE_URL: String = std::env::var("TASKCLUSTER_ROOT_URL").unwrap();
-    pub static ref TEMPLATES: Tera = {
-        let mut tera = match Tera::new("templates/**/*") {
-            Ok(t) => t,
-            Err(e) => {
-                println!("Parsing error(s): {}", e);
-                ::std::process::exit(1);
-            }
-        };
-        tera.autoescape_on(vec![".html", ".sql"]);
-        tera
-    };
 }
 
-pub fn get_context_for(module_name: &str, session: &Session) -> Context {
-    let mut context = Context::new();
-    context.insert("cur_module", module_name);
-    context.insert("base_url", &*BASE_URL);
-    context.insert(
-        "logged_in",
-        &session.get::<Credentials>("credentials").is_some(),
-    );
+pub struct BaseContext<'a> {
+    pub cur_module: &'a str,
+    pub base_url: &'a str,
+    pub logged_in: bool,
+}
 
-    context
+pub fn get_context_for<'a>(module_name: &'a str, session: &Session) -> BaseContext<'a> {
+    BaseContext {
+        cur_module: module_name,
+        base_url: &*BASE_URL,
+        logged_in: session.get::<Credentials>("credentials").is_some(),
+    }
 }
 
 fn setup_pulse() {

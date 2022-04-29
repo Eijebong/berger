@@ -4,7 +4,7 @@
     {% else %}
         <a href="{{ url }}" id="{{ name }}"><i class="{{ icon }}"></i> <span>{{ name }}</span></a>
     {% endif %}
-{% endmacro app_menu_item %}
+{% endmacro %}
 
 {% macro menu_item(name, icon, url, selected, id) %}
     {% if selected %}
@@ -12,4 +12,4 @@
     {% else %}
         <a href="{{ url }}" id="{{ id }}"><i class="{{ icon }}"></i> <span>{{ name }}</span></a>
     {% endif %}
-{% endmacro menu_item %}
+{% endmacro %}
