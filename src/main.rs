@@ -83,7 +83,7 @@ async fn main() -> Result<()> {
         })
         .catch_error(|err: crate::error::BergerError| async move {
             match err {
-                crate::error::BergerError::AuthenticationError => return Redirect::see_other("/"),
+                crate::error::BergerError::AuthenticationError => Redirect::see_other("/"),
             }
         });
 
