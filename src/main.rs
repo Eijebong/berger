@@ -60,8 +60,19 @@ async fn setup_db() -> Result<()> {
     Ok(())
 }
 
+fn check_env() -> Result<()> {
+    for var in ["DATABASE_URL", "TASKCLUSTER_ROOT_URL"] {
+        if std::env::var(var).is_err() {
+            anyhow::bail!("You should provide a `{}` environment variable.", var)
+        }
+    }
+
+    Ok(())
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
+    check_env()?;
     setup_logging();
     setup_db().await?;
     setup_pulse();
