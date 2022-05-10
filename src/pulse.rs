@@ -1,8 +1,9 @@
 use anyhow::{Context, Result};
 use futures_lite::stream::StreamExt;
 use lapin::{options::*, types::FieldTable, Connection, ConnectionProperties};
+use tokio::sync::broadcast::Sender;
 
-pub async fn start_pulse_handler() -> Result<()> {
+pub async fn start_pulse_handler(tx: Sender<()>) -> Result<()> {
     let addr = std::env::var("AMQP_ADDR").unwrap_or_else(|_| "amqp://127.0.0.1:5672/%2f".into());
 
     let conn = Connection::connect(&addr, ConnectionProperties::default()).await?;
@@ -79,6 +80,7 @@ pub async fn start_pulse_handler() -> Result<()> {
             tracing::error!("Error while handling message {}.", e);
         }
         msg.ack(BasicAckOptions::default()).await?;
+        tx.send(()).unwrap();
     }
 
     Ok(())
@@ -141,6 +143,7 @@ async fn handle_message(exchange: &str, data: Vec<u8>) -> Result<()> {
         }
         _ => {}
     }
+
     Ok(())
 }
 

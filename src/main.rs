@@ -16,6 +16,7 @@ use poem::{
 };
 
 use taskcluster::Credentials;
+use tokio::sync::broadcast::{channel, Sender};
 
 lazy_static::lazy_static! {
     pub static ref BASE_URL: String = std::env::var("TASKCLUSTER_ROOT_URL").unwrap();
@@ -35,13 +36,18 @@ pub fn get_context_for<'a>(module_name: &'a str, session: &Session) -> BaseConte
     }
 }
 
-fn setup_pulse() {
-    tokio::spawn(async {
+fn setup_pulse() -> Sender<()> {
+    let (tx, _rx) = channel(16);
+    let tx2 = tx.clone();
+    tokio::spawn(async move {
         loop {
-            let _ = pulse::start_pulse_handler().await;
+            let err = pulse::start_pulse_handler(tx.clone()).await;
             tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+            tracing::warn!("Connection to AMQP lost, reconnecting: {:?}", err);
         }
     });
+
+    tx2
 }
 
 fn setup_logging() {
@@ -75,10 +81,11 @@ async fn main() -> Result<()> {
     check_env()?;
     setup_logging();
     setup_db().await?;
-    setup_pulse();
+    let pulse_tx = setup_pulse();
 
     let app = Route::new()
         .at("/", get(crate::views::task_list::root))
+        .at("/task_list/subscribe", get(views::task_list::subscribe).data(pulse_tx))
         .at("/auth/callback", get(views::auth::callback))
         .at("/auth/login", get(views::auth::login))
         .at("/auth/logout", get(views::auth::logout))

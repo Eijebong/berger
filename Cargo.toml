@@ -16,7 +16,7 @@ chrono = { version = "0.4", features = ["serde"] }
 serde_json = "1"
 serde = "1"
 once_cell = "1"
-poem = { version = "1", features = ["compression", "static-files", "anyhow", "session"] }
+poem = { version = "1", features = ["compression", "static-files", "anyhow", "session", "sse"] }
 askama = "0.11"
 lazy_static = "1"
 anyhow = "1"
@@ -24,3 +24,4 @@ taskcluster = "44"
 oauth2 = "4"
 reqwest = "0.11"
 thiserror = "1"
+async-stream = "0.3"

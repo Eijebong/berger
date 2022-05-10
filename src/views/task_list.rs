@@ -2,7 +2,8 @@ use crate::models::TaskGroup;
 use anyhow::Result;
 
 use poem::{handler, session::Session, web::Html};
-
+use poem::web::sse::{Event, SSE};
+use poem::web::Data;
 use std::collections::HashSet;
 
 use serde::Serialize;
@@ -10,6 +11,7 @@ use serde::Serialize;
 use crate::views::utils::{gather_tc_scopes, HtmlOrRedirect};
 use crate::{db, get_context_for, BaseContext};
 use askama::Template;
+use tokio::sync::broadcast::Sender;
 
 #[derive(Serialize)]
 struct ComputedTaskGroup<'a> {
@@ -129,4 +131,16 @@ fn compute_taskgroup_status(group: &TaskGroup) -> ComputedTaskGroup {
         start,
         end,
     }
+}
+
+#[handler]
+pub fn subscribe(tx: Data<&Sender<()>>) -> SSE {
+    let mut rx = tx.subscribe();
+    let stream = async_stream::stream! {
+        while let Ok(_item) = rx.recv().await {
+            yield Event::message("hi");
+        }
+    };
+
+    SSE::new(stream)
 }
