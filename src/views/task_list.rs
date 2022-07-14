@@ -84,19 +84,21 @@ pub async fn root(req: &poem::Request, session: &Session) -> Result<HtmlOrRedire
 }
 
 fn get_commit_bounds_from_source(source: &str) -> (&str, &str) {
-    if source.starts_with("https://github.com/") {
-        let commit_range = source.split('/').last().unwrap();
-        if commit_range.contains("...") {
-            let mut parts = commit_range.split("...");
-            let start = parts.next().unwrap();
-            let end = parts.next().unwrap();
-            (start, end)
-        } else {
-            (commit_range, "")
-        }
-    } else {
-        ("", "")
+    if !source.starts_with("https://github.com/") {
+        return ("", "")
     }
+
+    let commit_range = source.split('/').last().unwrap();
+
+    if !commit_range.contains("...") {
+        return (commit_range, "")
+    }
+
+    let mut parts = commit_range.split("...");
+    let start = parts.next().unwrap();
+    let end = parts.next().unwrap();
+
+    (start, end)
 }
 
 fn compute_taskgroup_status(group: &TaskGroup) -> ComputedTaskGroup {
