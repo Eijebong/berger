@@ -30,7 +30,7 @@ pub struct BaseContext<'a> {
 pub fn get_context_for<'a>(module_name: &'a str, session: &Session) -> BaseContext<'a> {
     BaseContext {
         cur_module: module_name,
-        base_url: &*BASE_URL,
+        base_url: &BASE_URL,
         logged_in: session.get::<Credentials>("credentials").is_some(),
     }
 }

@@ -10,7 +10,7 @@ use taskcluster::Credentials;
 
 lazy_static::lazy_static!(
     pub static ref REDIRECT_URL: String = std::env::var("REDIRECT_URL").unwrap_or_else(|_| {
-        let url = Url::parse(&**BASE_URL).unwrap();
+        let url = Url::parse(&BASE_URL).unwrap();
         format!("https://berger.{}/auth/callback", url.host().unwrap())
     });
 );
