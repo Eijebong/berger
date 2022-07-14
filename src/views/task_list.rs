@@ -85,13 +85,13 @@ pub async fn root(req: &poem::Request, session: &Session) -> Result<HtmlOrRedire
 
 fn get_commit_bounds_from_source(source: &str) -> (&str, &str) {
     if !source.starts_with("https://github.com/") {
-        return ("", "")
+        return ("", "");
     }
 
     let commit_range = source.split('/').last().unwrap();
 
     if !commit_range.contains("...") {
-        return (commit_range, "")
+        return (commit_range, "");
     }
 
     let mut parts = commit_range.split("...");
