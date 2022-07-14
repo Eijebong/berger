@@ -43,15 +43,17 @@ pub async fn callback(
         .build()?;
     let res = client.execute(req).await?;
     let body: serde_json::Value = res.json().await?;
-    if let Some(token) = body["access_token"].as_str() {
-        if let Ok(creds) = fetch_creds(token).await {
-            session.set("credentials", creds);
-            Ok(Redirect::see_other("/"))
-        } else {
-            Ok(Redirect::see_other("/?invalid-creds"))
-        }
+
+    let token = match body["access_token"].as_str() {
+        Some(token) => token,
+        None => return Ok(Redirect::see_other("/?invalid-auth")),
+    };
+
+    if let Ok(creds) = fetch_creds(token).await {
+        session.set("credentials", creds);
+        Ok(Redirect::see_other("/"))
     } else {
-        Ok(Redirect::see_other("/?invalid-auth"))
+        Ok(Redirect::see_other("/?invalid-creds"))
     }
 }
 
