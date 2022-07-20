@@ -16,6 +16,7 @@
             {% call menu::app_menu_item("Task list", "fa-brands fa-buffer", "/", "index", base.cur_module) %}
             <li class="separator"></li>
             {% if base.logged_in %}
+            {% call menu::app_menu_item("Repositories", "fa-brands fa-buffer", "/repos", "repo_list", base.cur_module) %}
             {% call menu::app_menu_item("Logout", "fa fa-sign-out", "/auth/logout", "logout", base.cur_module) %}
             {% else %}
             {% call menu::app_menu_item("Login", "fa fa-sign-in", "/auth/login", "login", base.cur_module) %}
@@ -27,6 +28,7 @@
                 <nav id="module-menu">
                     {% block menu %}{% endblock menu %}
                 </nav>
+                <div id="messages"></div>
                 {% block main %}{% endblock main %}
             </main>
         </div>

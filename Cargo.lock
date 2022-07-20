@@ -384,6 +384,7 @@ dependencies = [
  "askama",
  "chrono",
  "futures-lite",
+ "itertools",
  "lapin",
  "lazy_static",
  "oauth2",

@@ -682,3 +682,107 @@ article
   border-bottom: 1px solid rgba(255,255,255,0.1)
   padding: 5px
 
+.repo_tr
+  cursor: pointer
+
+.hidden
+  display: none
+
+.git_ref td:first-child
+  padding-left: 30px
+
+.repo_list_table
+  width: 100%
+  border-collapse: collapse
+  border: 1px solid hsla(0,0%,0%, 0.25)
+  background-color: hsla(0,0%,0%,0.1)
+  margin: 15px 0
+
+  thead
+    background-color: hsla(0,0%,0%,0.25)
+    border: 1px solid hsla(0,0%,0%, 0.50)
+    box-shadow: inset 0 1px 0px hsla(0,0%,100%, 0.075)
+
+  tbody
+    font-weight: bold
+    &:hover
+      background-color: hsla(0,0%,100%,0.05)
+    .git_ref
+      font-weight: normal
+      td:last-child
+        text-align: right
+      &:nth-child(2n)
+        background-color: hsla(0,0%,0%,0.075)
+      &:hover
+        background-color: hsla(0,0%,100%,0.025)
+    box-shadow: 0 1px 0 0 rgba(0,0,0,0.5)
+
+  th
+    padding: 4px
+
+  td
+    padding: 4px
+    border-left: 1px dashed hsla(0,0%,0%, 0.35)
+
+    &:hover
+      background-color: hsla(0,0%,100%,0.030)
+      border-left: 1px solid hsl(200, 25%, 60%)
+
+  input
+    margin: 0px !important
+
+  button
+    width: 100%
+
+#messages
+  position: sticky
+  top: 0
+  z-index: 2
+  height: auto
+
+  @keyframes slideDown
+  from
+    height: 0
+
+  to
+    height: auto
+
+.message
+  padding: 0.5em 1em
+  font-weight: bold
+  color: white
+
+  animation-delay: 0.2s
+  animation-timing-function: ease-out
+  animation-duration: 5s
+  animation-iteration-count: 1
+
+
+  i
+    vertical-align: middle
+    font-size: 1.5em
+
+  span
+    margin-left: 1em
+    vertical-align: middle
+
+  &.error
+    background-color: #E06060
+    i
+      color: #FFABAB
+
+  &.warning
+    background-color: #FFC06E
+    i
+      color: #FEE5B3
+
+  &.success
+    background-color: #63C56B
+    i
+      color: #A4EAA4
+
+  &.info
+    background-color: #FFC06E
+    i
+      color: #FEE5B3
+

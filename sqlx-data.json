@@ -177,6 +177,42 @@
       ]
     }
   },
+  "bacee151ad44f7407df1ede64cb7132f4b24e5e8f05af0f7aee311422fd2d8ef": {
+    "query": "SELECT DISTINCT ON (1, 2, 3) repo_org, repo_name, git_ref, FIRST_VALUE(id) OVER (PARTITION BY (repo_org, repo_name, git_ref) ORDER BY created_at DESC) AS task_id FROM task_groups",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "repo_org",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 1,
+          "name": "repo_name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "git_ref",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 3,
+          "name": "task_id",
+          "type_info": "Varchar"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        null
+      ]
+    }
+  },
   "e822e628840d157533e5a2aa9e345123d1221acb416b0558b1554c0720986558": {
     "query": "INSERT INTO task_groups(id, created_at, repo_org, repo_name, git_ref, source) VALUES($1, $2, $3, $4, $5, $6) ON CONFLICT DO NOTHING",
     "describe": {

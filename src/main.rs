@@ -19,6 +19,7 @@ use taskcluster::Credentials;
 
 lazy_static::lazy_static! {
     pub static ref BASE_URL: String = std::env::var("TASKCLUSTER_ROOT_URL").unwrap();
+    pub static ref GITHUB_TRIGGER_HOOK: Option<String> = std::env::var("GITHUB_TRIGGER_HOOK").ok();
 }
 
 pub struct BaseContext<'a> {
@@ -79,6 +80,11 @@ async fn main() -> Result<()> {
 
     let app = Route::new()
         .at("/", get(crate::views::task_list::root))
+        .at("/repos", get(crate::views::repo_list::repo_list))
+        .at(
+            "/repos/trigger",
+            get(crate::views::repo_list::trigger_new_job),
+        )
         .at("/auth/callback", get(views::auth::callback))
         .at("/auth/login", get(views::auth::login))
         .at("/auth/logout", get(views::auth::logout))

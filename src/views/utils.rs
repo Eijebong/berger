@@ -5,7 +5,7 @@ use poem::{
     web::{Html, Redirect},
     IntoResponse,
 };
-use taskcluster::Credentials;
+use taskcluster::{ClientBuilder, Credentials};
 
 pub enum HtmlOrRedirect<T: Send + Into<String>> {
     Html(Html<T>),
@@ -33,14 +33,14 @@ impl<T: Send + Into<String>> From<Redirect> for HtmlOrRedirect<T> {
     }
 }
 
-pub async fn gather_tc_scopes(session: &Session) -> Result<Vec<String>> {
+pub async fn get_tc_client_and_scopes(session: &Session) -> Result<(ClientBuilder, Vec<String>)> {
     let mut client = taskcluster::ClientBuilder::new(&**BASE_URL);
     let mut has_credentials = false;
     if let Some(creds) = session.get::<Credentials>("credentials") {
         client = client.credentials(creds);
         has_credentials = true;
     }
-    let tc_auth = taskcluster::Auth::new(client)?;
+    let tc_auth = taskcluster::Auth::new(client.clone())?;
     let scopes = tc_auth.currentScopes().await.map_err(|e| {
         if has_credentials {
             return crate::error::BergerError::authentication_error(session).into();
@@ -48,7 +48,7 @@ pub async fn gather_tc_scopes(session: &Session) -> Result<Vec<String>> {
         e
     })?;
 
-    Ok(scopes["scopes"]
+    let scopes = scopes["scopes"]
         .as_array()
         .map(|scopes| {
             scopes
@@ -56,5 +56,12 @@ pub async fn gather_tc_scopes(session: &Session) -> Result<Vec<String>> {
                 .filter_map(|v| v.as_str().map(|s| s.to_string()))
                 .collect::<Vec<_>>()
         })
-        .unwrap_or_default())
+        .unwrap_or_default();
+
+    Ok((client, scopes))
+}
+pub async fn gather_tc_scopes(session: &Session) -> Result<Vec<String>> {
+    let (_, scopes) = get_tc_client_and_scopes(session).await?;
+
+    Ok(scopes)
 }

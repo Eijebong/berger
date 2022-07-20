@@ -16,12 +16,13 @@ environment variables:
 - `AMQP_ADDR`: The address of the rabbitmq used for taskcluster's pulse, example: `amqp://user:password@rabbitmq.taskcluster.your.org`
 - `DATABASE_URL`: The URL of the postgresql database berger will use to store its data, example: `postgres://user@password@postgres.taskcluster.your.org/berger`
 - `REDIRECT_URL`(optional): If your instance is not deployed as `berger.${TASKCLUSTER_ROOT_URL}`, set this to `berger.url/auth/callback`
+- `GITHUB_TRIGGER_HOOK`(optional): The hook to call to trigger jobs for github repositories. Example: `project/github-trigger`. More on that in the `Trigger hook` section.
 
 To use the login feature, you have to add an oauth client definition to your taskcluster instance.
 
 Example:
 
-`registered_clients: [ {"clientId": "berger", "responseType": "code", "scope": ["berger:*"], "whitelisted": true, "redirectUri": ["https://berger.taskcluster.url/auth/callback"], "maxExpires": "1 year" } ]`
+`registered_clients: [ {"clientId": "berger", "responseType": "code", "scope": ["berger:*", "hooks:trigger-hook:*], "whitelisted": true, "redirectUri": ["https://berger.taskcluster.url/auth/callback"], "maxExpires": "1 year" } ]`
 
 # Scopes
 
@@ -52,3 +53,26 @@ except for the source and custom metadata like tags.
 Technically the `git_ref` is not necessary to link to a push but then you
 cannot differentiate a branch push and a tag push as the source would show up
 as the same. Note that I'm open to any way of simplificating these requirements.
+
+## Trigger hook
+
+Berger includes a way to run jobs from a predefined hook. This is useful to
+avoid requiring empty commits to rerun some CI. It works by triggering the hook
+specified by `GITHUB_TRIGGER_HOOK` with the following arguments:
+  - repo\_org
+  - repo\_name
+  - branch
+
+You can then craft a hook that runs your decision task for a push for that repo. The hooks should have the following trigger schema:
+
+```
+type: object
+properties:
+  branch:
+    type: string
+  repo_org:
+    type: string
+  repo_name:
+    type: string
+additionalProperties: false
+```

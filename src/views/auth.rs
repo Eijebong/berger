@@ -82,6 +82,7 @@ pub async fn login() -> Result<Redirect> {
     let (url, _) = client
         .authorize_url(CsrfToken::new_random)
         .add_scope(Scope::new("berger:*".into()))
+        .add_scope(Scope::new("hooks:trigger-hook:*".into()))
         .url();
 
     Ok(Redirect::see_other(url))
