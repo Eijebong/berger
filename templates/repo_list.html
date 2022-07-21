@@ -16,7 +16,7 @@
             {% for ref in repo.branches %}
             <tr class="hidden git_ref">
                 <td>{{ ref.0 }}</td>
-                <td><a href={{ base.base_url }}/tasks/{{ ref.1 }}>{{ ref.1 }}</a></td>
+                <td><a href={{ base.base_url }}/tasks/groups/{{ ref.1 }}>{{ ref.1 }}</a></td>
                 <td><a onclick="triggerNewJob('{{repo.repo_org}}', '{{repo.repo_name}}', '{{ref.0}}')" class="validation-button">Run job</a></td>
             </tr>
             {% endfor %}
