@@ -72,9 +72,7 @@ pub async fn start_pulse_handler() -> Result<()> {
         )
         .await?;
 
-    while let Some(msg) = consumer.next().await {
-        let msg = msg.unwrap();
-        dbg!(&msg.exchange);
+    while let Some(Ok(msg)) = consumer.next().await {
         if let Err(e) = handle_message(msg.exchange.as_str(), msg.data.clone()).await {
             tracing::error!("Error while handling message {}.", e);
         }
