@@ -7,7 +7,7 @@ jobs:
     name: Check
     runs-on: ubuntu-latest
     container:
-      image: ubuntu:21.10
+      image: ubuntu:22.04
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
@@ -34,7 +34,7 @@ jobs:
     name: Lints
     runs-on: ubuntu-latest
     container:
-      image: ubuntu:21.10
+      image: ubuntu:22.04
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
